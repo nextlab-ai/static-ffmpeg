@@ -131,7 +131,7 @@ ARG LIBASS_SHA256=d653be97198a0543c69111122173c41a99e0b91426f9e17f06a858982c2fb0
 RUN \
   wget $WGET_OPTS -O libass.tar.gz "$LIBASS_URL" && \
   echo "$LIBASS_SHA256  libass.tar.gz" | sha256sum --status -c - && \
-  tar xf libass.tar.gz && \
+  tar xf libass.tar.gz --no-same-owner && \
   cd libass-* && ./configure --disable-shared --enable-static && \
   make -j$(nproc) && make install
 
@@ -765,6 +765,9 @@ RUN \
   cd ffmpeg-* && \
   sed -i 's/add_ldexeflags -fPIE -pie/add_ldexeflags -fPIE -static-pie/' configure && \
   ./configure \
+  --disable-network \
+  --disable-devices \
+  --enable-small \
   --pkg-config-flags="--static" \
   --extra-cflags="-fopenmp" \
   --extra-ldflags="-fopenmp -Wl,-z,stack-size=2097152" \
@@ -776,56 +779,9 @@ RUN \
   --enable-gpl \
   --enable-version3 \
   --enable-nonfree \
-  --enable-fontconfig \
-  --enable-gray \
-  --enable-iconv \
-  --enable-lcms2 \
-  --enable-libaom \
-  --enable-libaribb24 \
-  --enable-libass \
-  --enable-libbluray \
-  --enable-libdav1d \
-  --enable-libdavs2 \
-  --enable-libfdk-aac \
-  --enable-libfreetype \
-  --enable-libfribidi \
-  --enable-libgme \
-  --enable-libgsm \
-  --enable-libkvazaar \
-  --enable-libmodplug \
-  --enable-libmp3lame \
-  --enable-libmysofa \
-  --enable-libopencore-amrnb \
-  --enable-libopencore-amrwb \
-  --enable-libopenjpeg \
-  --enable-libopus \
-  --enable-librabbitmq \
-  --enable-librav1e \
-  --enable-librtmp \
-  --enable-librubberband \
-  --enable-libshine \
-  --enable-libsnappy \
-  --enable-libsoxr \
-  --enable-libspeex \
-  --enable-libsrt \
-  --enable-libssh \
-  --enable-libsvtav1 \
-  --enable-libtheora \
-  --enable-libtwolame \
-  --enable-libuavs3d \
-  --enable-libvidstab \
-  --enable-libvmaf \
-  --enable-libvo-amrwbenc \
-  --enable-libvorbis \
-  --enable-libvpx \
-  --enable-libwebp \
   --enable-libx264 \
   --enable-libx265 \
-  --enable-libxavs2 \
-  --enable-libxml2 \
   --enable-libxvid \
-  --enable-libzimg \
-  --enable-openssl \
   || (cat ffbuild/config.log ; false) \
   && make -j$(nproc) install
 
@@ -913,11 +869,11 @@ RUN ["/ffmpeg", "-version"]
 RUN ["/ffprobe", "-version"]
 RUN ["/ffmpeg", "-hide_banner", "-buildconf"]
 # stack size
-RUN ["/ffmpeg", "-f", "lavfi", "-i", "testsrc", "-c:v", "libsvtav1", "-t", "100ms", "-f", "null", "-"]
+# RUN ["/ffmpeg", "-f", "lavfi", "-i", "testsrc", "-c:v", "libsvtav1", "-t", "100ms", "-f", "null", "-"]
 # dns
-RUN ["/ffprobe", "-i", "https://github.com/favicon.ico"]
+# RUN ["/ffprobe", "-i", "https://github.com/favicon.ico"]
 # tls/https certs
-RUN ["/ffprobe", "-tls_verify", "1", "-ca_file", "/etc/ssl/cert.pem", "-i", "https://github.com/favicon.ico"]
+# RUN ["/ffprobe", "-tls_verify", "1", "-ca_file", "/etc/ssl/cert.pem", "-i", "https://github.com/favicon.ico"]
 
 # clamp all files into one layer
 FROM scratch AS final2
